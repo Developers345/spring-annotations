@@ -107,7 +107,6 @@ There are three types of annotations:
           this.name = name;
       }
   }
-````
 
 ```xml
 <bean id="exampleBean" class="com.example.ExampleBean">
@@ -120,5 +119,3 @@ There are three types of annotations:
   * `@Required` is a replacement for the limited `dependency-check`.
   * It enforces mandatory setter injection at the framework level.
   * Deprecated in favor of constructor injection for better design and clarity.
-
-```
