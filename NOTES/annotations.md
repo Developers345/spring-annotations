@@ -62,3 +62,63 @@ There are three types of annotations:
 ## 3. Runtime Assister
 - Annotations written in the source code that are retained until runtime.
 
+## 4. How Annotation Works Internally?
+
+- Spring initially did not support annotations. Later, from Spring 2.0 onwards, Spring supports annotations.
+- Enabling annotations in Spring internally uses **BeanPostProcessor**.
+- **BeanPostProcessor** is used to perform initialization and customization **after an object is created in the IOC container but before it is used**.
+
+## 5. @Required Annotation: What Happens Internally?
+
+- **Background:**
+  - Before the introduction of the `@Required` annotation, Spring used a concept called **"dependency-check"**.
+  - The purpose of **dependency-check** was to enforce **mandatory setter injection**, ensuring that certain properties must be set for a bean.
+
+- **Drawbacks of dependency-check:**
+  - If a bean had multiple attributes (e.g., three attributes injected via setter in the XML configuration), you could only specify at the bean definition level:
+    ```xml
+    <bean id="exampleBean" class="com.example.Example" dependency-check="simple"/>
+    ```
+    - This meant all three attributes were mandatory.
+    - However, if you wanted only **one attribute** to be mandatory while others were optional, dependency-check could not support this scenario.
+  - Due to this limitation, Spring removed **dependency-check** starting from **Spring 2.5**.
+
+- **Introduction of @Required annotation:**
+  - To replace dependency-check, Spring introduced the `@Required` annotation.
+  - **How it works internally:**
+    - When a bean with `@Required` annotation is created:
+      1. Spring first creates the object of the target class.
+      2. It performs setter injection **after the post-construction of the bean**, but **before placing the bean into the IOC container**.
+      3. Spring scans the class to check which setters have been marked with `@Required`.
+      4. For each `@Required` setter, Spring verifies if a value is provided via the `<property>` tag in the XML configuration.
+      5. If a required property is missing, Spring throws a **`BeanInitializationException`** to indicate that mandatory properties are not set.
+
+- **Deprecation:**
+  - The `@Required` annotation was **deprecated in Spring 5.1**.
+  - The recommended alternative is **constructor injection** for mandatory properties, as it provides better immutability and clearer enforcement of required dependencies.
+
+- **Example:**
+  ```java
+  public class ExampleBean {
+      private String name;
+
+      @Required
+      public void setName(String name) {
+          this.name = name;
+      }
+  }
+````
+
+```xml
+<bean id="exampleBean" class="com.example.ExampleBean">
+    <property name="name" value="Spring Example"/>
+</bean>
+```
+
+* **Key Points to Remember:**
+
+  * `@Required` is a replacement for the limited `dependency-check`.
+  * It enforces mandatory setter injection at the framework level.
+  * Deprecated in favor of constructor injection for better design and clarity.
+
+```
