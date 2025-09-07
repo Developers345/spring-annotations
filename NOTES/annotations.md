@@ -5,7 +5,7 @@
 - Annotations are an alternate way to provide information to the container.  
 - Annotations came into picture due to the disadvantages of using XML.
 
-# XML Disadvantages
+## 2. XML Disadvantages
 
 - XML is verbose (lengthy configuration). To define information for one class, we may need to write a minimum of 3 lines.  
 - Developers need to remember the tags and their correct order.  
