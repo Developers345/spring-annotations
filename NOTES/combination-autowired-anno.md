@@ -1400,9 +1400,4 @@ Robo{chip=Chip{chipId=101, modelNo='model102'}}
 * In this way, indirectly by using `@Qualifier`, we are able to perform **“byName” injection**.
 * If we do not configure any qualifier value, then by default the qualifier value will be the **attribute name**.
 
-```
-
-
-
-
 
