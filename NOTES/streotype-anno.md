@@ -354,3 +354,169 @@ public class StereotypeAnnotationTest {
 * Be careful with typos in annotations or XML tags (`@PreDestroy`, `@Autowired`, `<context:annotation-config>`).
 
 ---
+
+# @Scope Annotation in Spring
+
+## Introduction
+- If you don’t want your bean to be **singleton** and want it to be **prototype**, then you should use the `scope` attribute in the bean tag.
+- If you don’t want to use the `scope` attribute in XML, you can use the **annotation-driven approach** with `@Scope("prototype")`.
+
+---
+
+## Example
+
+### Class
+
+```java
+import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+
+@Component
+@Scope("prototype")
+public class Robot {
+    // Class implementation
+}
+````
+
+---
+
+### application-stereotype-context.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context 
+           http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+    <bean id="chip" class="com.spring.annotations.streotype.Chip">
+        <property name="chipId" value="101"/>
+        <property name="modelNo" value="model102"/>
+    </bean>
+
+    <!-- <bean id="robo" class="com.spring.annotations.Robo"/> -->
+
+    <context:component-scan base-package="com.spring.annotations.streotype"/>
+</beans>
+```
+
+---
+
+### Test Class
+
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class StreoTypeAnnotationTest {
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("application-stereotype-context.xml");
+
+        Robot robot = context.getBean("robot", Robot.class);
+        Robot robot1 = context.getBean("robot", Robot.class);
+
+        System.out.println("robot=robot1? " + (robot == robot1));
+    }
+}
+```
+
+---
+
+### Output
+
+```
+robot=robot1? false
+```
+
+---
+
+## Summary
+
+* Using `@Scope("prototype")` ensures that every time you request a bean from the context, a **new instance** is created.
+* Singleton is default in Spring; `prototype` creates a **new object per request**.
+
+
+# @Lazy Annotation in Spring
+
+## Introduction
+- When an **IOC container** is created using `ApplicationContext`, all bean definitions are instantiated immediately because the IOC container is **eager initializer** by default.  
+- `ApplicationContext` instantiates all **singleton beans** at the time of container creation.  
+- If you don’t want your IOC container to be an eager initializer, you can use `lazy="true"` at the bean level in XML.  
+- Alternatively, you can make a bean lazy by annotating the class with `@Lazy`.
+
+---
+
+## Example
+
+### Class
+
+```java
+import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Lazy;
+
+@Component
+@Lazy
+public class Employee {
+
+    public Employee() {
+        System.out.println("Employee object initialized");
+    }
+}
+````
+
+---
+
+### application-stereotype-context.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context 
+           http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+    <bean id="chip" class="com.spring.annotations.streotype.Chip">
+        <property name="chipId" value="101"/>
+        <property name="modelNo" value="model102"/>
+    </bean>
+
+    <!-- <bean id="robo" class="com.spring.annotations.Robo"/> -->
+
+    <context:component-scan base-package="com.spring.annotations.streotype"/>
+</beans>
+```
+
+---
+
+### Test Class
+
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class StreoTypeAnnotationTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("application-streotype-context.xml");
+
+        Employee emp = context.getBean("employee", Employee.class);
+    }
+}
+```
+
+---
+
+## Notes
+
+* If `@Lazy` annotation is enabled, Spring creates the object **only when the bean is requested**.
+* If `@Lazy` annotation is **not** enabled, Spring creates the object at the time of **IOC container initialization**.
+
+
