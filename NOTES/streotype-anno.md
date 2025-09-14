@@ -217,3 +217,140 @@ public @interface Service {
    <context:component-scan base-package="com.example.yourpackage" />
    ```
 
+There are **two ways** to enable annotation support in Spring XML configuration:
+
+1. `<context:annotation-config>`
+2. `<context:component-scan base-package="...">`
+
+---
+
+## Step 1 — What each tag does
+
+### `<context:annotation-config>`
+- Does **not** register stereotype beans (like `@Component`, `@Service`, `@Repository`, `@Controller`).
+- Only enables processing of certain annotations used for injection and lifecycle:
+  - `@Autowired`
+  - `@Qualifier`
+  - `@Required`
+  - `@PostConstruct`
+  - `@PreDestroy`
+
+> Note: `annotation-config` **does not** perform component scanning — it only activates annotation-based processing for beans already declared in the container.
+
+### `<context:component-scan base-package="...">`
+- Scans the specified package(s) for stereotype-annotated classes (`@Component`, `@Service`, `@Repository`, `@Controller`, etc.) and registers them as beans.
+- Also implicitly enables the functionality provided by `<context:annotation-config>` (so you get the injection and lifecycle annotation processing automatically).
+
+---
+
+## Step 2 — Scanning multiple packages
+- If you want to scan multiple packages, either:
+  - Point `base-package` to a common parent package to pick up subpackages (one level above), **or**
+  - Specify multiple packages separated by `,` or `;`, for example:
+    ```xml
+    <context:component-scan base-package="com.example.pkg1, com.example.pkg2"/>
+    ```
+
+---
+
+## Example
+
+### Target class
+```java
+@Component
+public class Robot {
+
+    private Chip chip;
+
+    @Autowired
+    public void setChip(Chip chip) {
+        this.chip = chip;
+    }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "chip=" + chip +
+                '}';
+    }
+}
+````
+
+### Dependent class
+
+```java
+public class Chip {
+    private String chipId;
+    private String modelNo;
+
+    public void setChipId(String chipId) {
+        this.chipId = chipId;
+    }
+
+    public void setModelNo(String modelNo) {
+        this.modelNo = modelNo;
+    }
+
+    public String getModelNo() {
+        return modelNo;
+    }
+
+    public String getChipId() {
+        return chipId;
+    }
+
+    @Override
+    public String toString() {
+        return "Chip{" +
+                "chipId=" + chipId +
+                ", modelNo='" + modelNo + '\'' +
+                '}';
+    }
+}
+```
+
+### `application-stereotype-context.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+    <bean id="chip" class="com.spring.annotations.streotype.Chip">
+        <property name="chipId" value="101"/>
+        <property name="modelNo" value="model102"/>
+    </bean>
+
+    <!-- Uncommenting the following is NOT needed if you use component-scan and @Component on Robot -->
+    <!-- <bean id="robo" class="com.spring.annotations.Robo"/> -->
+
+    <context:component-scan base-package="com.spring.annotations.streotype"/>
+</beans>
+```
+
+### Test
+
+```java
+public class StereotypeAnnotationTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("application-stereotype-context.xml");
+        Robot robot = context.getBean("robot", Robot.class);
+        System.out.println(robot);
+    }
+}
+```
+
+---
+
+## Quick notes / reminders
+
+* If you use `@Component` on classes and `context:component-scan`, Spring will discover and register those beans automatically (the default bean id is the uncapitalized class name, e.g. `robot` for `Robot`).
+* Use `<context:annotation-config/>` only when you have beans declared manually in XML but still want annotation processing (no component scanning).
+* To scan multiple packages, either give a parent package or list multiple packages with `,` or `;`.
+* Be careful with typos in annotations or XML tags (`@PreDestroy`, `@Autowired`, `<context:annotation-config>`).
+
+---
