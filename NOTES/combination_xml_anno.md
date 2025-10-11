@@ -6,7 +6,6 @@ There are 4 ways to work with annotations:
 2. **Stereotype Annotations** — Only annotations
 3. **Stereotype with XML** — Combination of annotations with XML
 4. **Stereotype with Java Configuration Approach** — Annotations with using java configuration classes alternative to XML.
-```
 
 # Combination of Annotations (XML + Annotation) — Example 1
 
