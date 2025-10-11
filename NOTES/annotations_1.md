@@ -378,8 +378,62 @@ public class PropertySourceAnnotationTest {
 AutomaticRobo{sensor=Sensor{sensorId='sen123', sensorType='silicon s145'}}
 ```
 
+# @DependsOn Annotation
 
+## Spring Bean Configuration File
 
+- By default, the IOC container creates the objects based on the declaration order (top-to-bottom) in the configuration approach (Spring bean configuration file).  
+- By using `dependson tag`, we can manage the order of creation of objects.
+
+## Annotation Approach
+
+- In the annotation approach, we can’t control the order of object creation.
+
+# Example
+
+## Account Class
+
+```java
+@Component
+@DependsOn("customer")
+public class Account {
+
+    public Account() {
+        System.out.println("Account object initialization");
+    }
+}
+````
+
+## Customer Class
+
+```java
+@Component
+public class Customer {
+
+    public Customer() {
+        System.out.println("Customer object initialization");
+    }
+}
+```
+
+## Test Class
+
+```java
+public class DependsOnTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context =
+            new AnnotationConfigApplicationContext("com.spring.annotations.dependson");
+    }
+}
+```
+
+## Output
+
+```
+Customer object initialization
+Account object initialization
+```
 
 
 
