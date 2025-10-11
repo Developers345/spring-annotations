@@ -1,4 +1,4 @@
-# @AnnotationContextApplicationContext Annotation
+# @AnnotationConfigApplicationContext Annotation
 
 ---
 
