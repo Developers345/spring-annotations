@@ -1,3 +1,12 @@
+# What is Bean Definition?
+
+- A **bean definition** is a class configured with the values and dependencies that we want the IOC container to use when instantiating the object of our classes.
+
+**Or**
+
+- For the IOC container to instantiate objects of our classes, we provide configuration information such as property values or dependencies.  
+  Based on this configuration provided by the developer, the IOC container creates (instantiates) the objects of our classes.
+
 ## 1. Why Annotations Come Into Picture?
 
 - Annotations are meant to provide information about our classes to the Spring IoC container.  
