@@ -2,7 +2,7 @@
 # What is Spring Bean?
 
 A **Spring Bean** is an object that is instantiated and managed by the **IoC (Inversion of Control) container**.
-```
+
 # What is Bean Definition?
 
 - A **bean definition** is a class configured with the values and dependencies that we want the IOC container to use when instantiating the object of our classes.
