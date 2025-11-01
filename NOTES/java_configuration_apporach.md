@@ -285,4 +285,49 @@ Launched
 ✅ **Best Practice:**
 Always prefer **method parameter injection** when wiring beans in **Java configuration**, as it’s cleaner, modern, and fully supported in **Spring 5.x and above**.
 
+# @Autowired in Spring (Java Configuration Approach)
+
+## What is `@Autowired`?
+- `@Autowired` should be written **inside the class** for which we want to perform **autowiring**.  
+- It allows Spring to automatically inject **dependent beans** into a class without manual configuration.
+
+---
+
+## 1. How Dependencies Are Identified
+- Dependencies are identified **by type only** (`byType`).
+
+---
+
+## 2. How Dependencies Are Injected
+- Dependencies are injected **based on the level** at which we wrote the annotation:
+  - **Field level:** Injects directly into the variable.
+  - **Constructor level:** Injects through constructor parameters.
+  - **Setter/method level:** Injects through setter or custom methods.
+
+---
+
+## Why `@Qualifier` Is Not Used in Java Configuration Approach
+
+```java
+/* 
+@Qualifier("rocket1") -> It will not be used in Java Configuration approach.
+
+Reason:
+In XML-based Spring configuration, beans are defined at the **bean level**, so the IoC container can easily identify which bean to inject.
+
+However, in Java-based configuration, beans are defined at the **method level** (inside @Configuration classes). 
+Due to this, the IoC container may get confused about which specific bean to inject.
+*/
+````
+
+---
+
+## Alternative: Using `@Primary`
+
+```java
+@Primary 
+// Tells the IoC container to consider this bean as the default choice
+// and ignore other beans for autowiring 
+// (equivalent to setting autowire-candidate="false" for other beans in XML configuration)
+```
 
