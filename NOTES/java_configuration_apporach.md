@@ -490,4 +490,92 @@ When you call `env.getProperty("key")`, the `Environment` object internally goes
 `PropertySource` and retrieves the value.
 
 
+# DependsOn in Java Configuration Approach
+
+## Example Program
+
+### Rocket.java
+```java
+public class Rocket {
+    public Rocket() {
+        System.out.println("Rocket() constructor");
+    }
+}
+````
+
+---
+
+### SignalTower.java
+
+```java
+public class SignalTower {
+    public SignalTower() {
+        System.out.println("SignalTower() constructor");
+    }
+}
+```
+
+---
+
+## Java Configuration Class
+
+### DependsOnConfig.java
+
+```java
+@Configuration
+public class DependsOnConfig {
+
+    @Bean
+    @DependsOn("signalTower")
+    public Rocket rocket() {
+        Rocket rocket = new Rocket();
+        return rocket;
+    }
+
+    @Bean
+    public SignalTower signalTower() {
+        SignalTower signalTower = new SignalTower();
+        return signalTower;
+    }
+}
+```
+
+---
+
+## Test Class
+
+### DependsOnTest.java
+
+```java
+public class DependsOnTest {
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(DependsOnConfig.class);
+    }
+}
+```
+
+---
+
+## Output
+
+```
+SignalTower() constructor
+Rocket() constructor
+```
+
+---
+
+## Explanation
+
+* The `@DependsOn` annotation in Spring is used to **define bean initialization order**.
+* In this example, the `rocket` bean is annotated with `@DependsOn("signalTower")`,
+  which means the **`signalTower` bean must be initialized first**.
+* When the application context is started, Spring ensures that:
+
+  1. The `SignalTower` bean is created first.
+  2. Then the `Rocket` bean is created.
+* This is useful when a bean depends on another bean’s initialization logic (e.g., resource setup, logging, etc.).
+
+
+
 
