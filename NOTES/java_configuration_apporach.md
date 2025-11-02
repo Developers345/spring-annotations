@@ -331,3 +331,163 @@ Due to this, the IoC container may get confused about which specific bean to inj
 // (equivalent to setting autowire-candidate="false" for other beans in XML configuration)
 ```
 
+# Primitive Injection in Java Configuration Approach
+
+## Example Program
+
+### Player.java
+```java
+public class Player {
+    private int playerNo;
+    private String playerName;
+    private String team;
+    private int rank;
+
+    public int getPlayerNo() {
+        return playerNo;
+    }
+
+    public void setPlayerNo(int playerNo) {
+        this.playerNo = playerNo;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "playerNo=" + playerNo +
+                ", playerName='" + playerName + '\'' +
+                ", team='" + team + '\'' +
+                ", rank=" + rank +
+                '}';
+    }
+}
+````
+
+---
+
+### EnvConfig.java
+
+```java
+@Configuration
+// @PropertySources({@PropertySource("classpath:application.properties"), @PropertySource("classpath:errors.properties")})
+// -> How to read multiple properties files
+@PropertySource("classpath:application_env.properties")
+public class EnvConfig {
+
+    /*
+    Whenever you write the @PropertySource annotation in JavaConfig class,
+    an Environment object is automatically created inside the IoC container.
+    This Environment object holds references of multiple PropertySource objects like a chain.
+    Whenever you call env.getProperty("key"), the Environment object internally
+    looks up the corresponding PropertySource object and retrieves the value.
+    */
+    @Autowired
+    private Environment env;
+    
+    @Bean
+    public Player player() throws IOException {
+        Player player = new Player();
+        System.out.println(this.getClass().getName());
+
+        player.setPlayerNo(Integer.parseInt(env.getProperty("playerNo")));
+        player.setPlayerName(env.getProperty("playerName"));
+        player.setTeam(env.getProperty("team"));
+        player.setRank(Integer.parseInt(env.getProperty("rank")));
+
+        /*
+        Here, the problem is we are reading data manually from the properties file.
+        If the same properties are needed in another method, we would have to write
+        the same code again. Creating a separate method and calling it is also unnecessary
+        because Spring provides the @PropertySource annotation for this purpose.
+
+        Example (manual way):
+        Properties props = new Properties();
+        props.load(this.getClass().getResourceAsStream("/application_env.properties"));
+        player.setPlayerNo(Integer.parseInt(props.getProperty("playerNo")));
+        player.setPlayerName(props.getProperty("playerName"));
+        player.setTeam(props.getProperty("team"));
+        player.setRank(Integer.parseInt(props.getProperty("rank")));
+       */
+
+        /*
+        Hardcoded values example (not recommended):
+        player.setPlayerNo(101);
+        player.setPlayerName("Sachin");
+        player.setTeam("India");
+        player.setRank(1);
+        */
+
+        return player;
+    }
+}
+```
+
+---
+
+### application_env.properties
+
+```
+playerNo=101
+playerName=Sachin
+team=india
+rank=1
+```
+
+---
+
+### EnvTest.java
+
+```java
+public class EnvTest {
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(EnvConfig.class);
+        Player player = context.getBean("player", Player.class);
+        System.out.println(player);
+    }
+}
+```
+
+### Output
+
+com.spring.annotations.javaconfig.primitive.env.EnvConfig$$SpringCGLIB$$0
+Player{playerNo=101, playerName='Sachin', team='india', rank=1}
+
+
+
+<img width="902" height="486" alt="Screenshot 2025-11-01 183054" src="https://github.com/user-attachments/assets/2b46975d-006b-4497-b9a2-73531c69161d" />
+
+
+### Explanation
+
+Whenever you write the `@PropertySource` annotation in a Java configuration class,
+an **Environment** object is created inside the **IoC container**.
+This `Environment` object holds references of multiple `PropertySource` objects like a chain.
+When you call `env.getProperty("key")`, the `Environment` object internally goes to the respective
+`PropertySource` and retrieves the value.
+
+
+
