@@ -576,6 +576,196 @@ Rocket() constructor
   2. Then the `Rocket` bean is created.
 * This is useful when a bean depends on another bean’s initialization logic (e.g., resource setup, logging, etc.).
 
+# Bean Life Cycle Using Stereotype Annotation
 
+## Example Program
+
+### Calculator
+
+```java
+@Component
+@PropertySource("classpath:application_streotype_blc.properties")
+public class Calculator {
+
+    private int a;
+    private int b;
+    private int sum;
+
+    public Calculator(@Value("${a}") int a) {
+        this.a = a;
+    }
+
+    @Value("${b}")
+    public void setB(int b) {
+        this.b = b;
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("init");
+        this.sum = this.a + this.b;
+    }
+
+    @PreDestroy
+    public void close() {
+        System.out.println("close()");
+        this.sum = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Calculator{" +
+                "a=" + a +
+                ", b=" + b +
+                ", sum=" + sum +
+                '}';
+    }
+}
+````
+
+---
+
+### application_streotype_blc.properties
+
+```
+a=10
+b=20
+```
+
+---
+
+### Test.java
+
+```java
+public class BLCStreotypeTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext("com.spring.annotations.streotype.blc");
+        
+        Calculator calculator = context.getBean("calculator", Calculator.class);
+        
+        // ApplicationContext no need to write shutdown hook class, automatically registered unlike BeanFactory.
+        ((ConfigurableApplicationContext) context).registerShutdownHook();
+        
+        System.out.println(calculator);
+    }
+}
+```
+
+---
+
+### Output
+
+
+init
+Calculator{a=10, b=20, sum=30}
+close()
+
+
+# Bean Life Cycle Java Config Approach
+
+## Example Program
+
+### Calculator.java
+
+```java
+// No Source Code
+public class Calculator {
+
+    private int a;
+    private int b;
+    private int sum;
+
+    public Calculator(@Value("${a}") int a) {
+        this.a = a;
+    }
+
+    public void setB(int b) {
+        this.b = b;
+    }
+
+    public void init() {
+        System.out.println("init");
+        this.sum = this.a + this.b;
+    }
+
+    public void close() {
+        System.out.println("close()");
+        this.sum = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Calculator{" +
+                "a=" + a +
+                ", b=" + b +
+                ", sum=" + sum +
+                '}';
+    }
+}
+````
+
+---
+
+### Java Config Class
+
+```java
+@Configuration
+@PropertySource("classpath:application_javaconfig_blc.properties")
+public class BLCJavaConfig {
+
+    @Autowired
+    private Environment env;
+
+    @Bean(initMethod = "init", destroyMethod = "close")
+    public Calculator calculator() {
+        Calculator calculator = new Calculator(Integer.parseInt(env.getProperty("a")));
+        calculator.setB(Integer.parseInt(env.getProperty("b")));
+        return calculator;
+    }
+}
+```
+
+---
+
+### application_javaconfig_blc.properties
+
+```
+a=60
+b=30
+```
+
+---
+
+### Test.java
+
+```java
+public class BLCJavaConfigTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(BLCJavaConfig.class);
+        // ApplicationContext no need to write shutdown hook class automatically registered unlike BeanFactory.
+        ((ConfigurableApplicationContext) context).registerShutdownHook();
+        Calculator calculator = context.getBean("calculator", Calculator.class);
+        System.out.println(calculator);
+    }
+}
+```
+
+---
+
+### Output
+
+```
+init
+Calculator{a=60, b=30, sum=90}
+close()
+```
+
+---
+
+> **Note:**
+> The `@Value` annotation can be used at the **setter level**, **attribute level**, and **constructor parameter level** as well.
 
 
