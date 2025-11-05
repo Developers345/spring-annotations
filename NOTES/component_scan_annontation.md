@@ -237,9 +237,4 @@ Toy{toyName='Train Toy', motor=Motor{capacity=20, type='aluminium'}}
 - This `Environment` object can be accessed and used throughout the entire application.  
 - There is no need to declare the `@PropertySource` annotation again in stereotype or component classes containing source code.  
 - These classes can directly utilize the existing `Environment` object.
-```
 
-
-
-```
-```
