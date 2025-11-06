@@ -83,7 +83,6 @@ The `@Profile` annotation provides a clean and scalable solution for managing mu
 <img width="3163" height="4116" alt="SPRING-PROFILE" src="https://github.com/user-attachments/assets/b480b7f9-f064-408d-ada4-5035d5513116" />
 
 ## Pictorial Representation - 3
-
 <img width="1907" height="324" alt="Screenshot 2025-11-06 100611" src="https://github.com/user-attachments/assets/f1860cc7-421a-42c0-81a3-71552150d47e" />
 
 ## Pictorial Representation - 4
