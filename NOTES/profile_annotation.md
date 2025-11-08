@@ -258,4 +258,213 @@ Listening...
 Radio{bandType='AM', frequencyRange=100-200, tuner=com.spring.annotations.streotype.profiles.AnalogTuner@2a266d09}
 ```
 
+# Example Program: @Profile Annotation with Java Configuration Class
+
+---
+
+## Robot.java
+```java
+//No Source Code
+public class Robot {
+    private String robotType;
+    private int version;
+    private ISensor sensor;
+
+    public void setRobotType(String robotType) {
+        this.robotType = robotType;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public void setSensor(ISensor sensor) {
+        this.sensor = sensor;
+    }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "robotType='" + robotType + '\'' +
+                ", version=" + version +
+                ", sensor=" + sensor +
+                '}';
+    }
+}
+````
+
+---
+
+## ISensor.java
+
+```java
+public interface ISensor {
+    public void init();
+}
+```
+
+---
+
+## InfraSensorImpl.java
+
+```java
+//Source Code Present
+@Component
+@Qualifier("infraSensorImpl")
+//@Profile("dev") // you need to tell ioc container use for dev env
+public class InfraSensorImpl implements ISensor {
+
+    @Value("${range}")
+    private int range;
+
+    @PostConstruct
+    @Override
+    public void init() {
+        System.out.println("InfraSensor initialized");
+    }
+}
+```
+
+---
+
+## TermnalSensorImpl.java
+
+```java
+//Source Code Present
+@Component
+@Qualifier("termnalSensorImpl")
+//@Profile("qa") // you need to tell ioc container use for qa env
+public class TermnalSensorImpl implements ISensor {
+
+    @Value("${heatDetection}")
+    private int heatDetection;
+
+    @PostConstruct
+    @Override
+    public void init() {
+        System.out.println("TermnalSensor initalized");
+    }
+}
+```
+
+---
+
+## DevConfig.java
+
+```java
+@Configuration
+@PropertySource("classpath:application_jc_profiles_dev.properties")
+@ComponentScan(basePackages = {"com.spring.annotations.javaconfig.profiles"})
+@Profile("dev") // Here you tell to IOC container this configuration belongs to which env
+public class DevConfig {
+
+    @Autowired
+    private Environment env;
+
+    @Autowired
+    @Qualifier("infraSensorImpl")
+    private ISensor sensor;
+
+    @Bean
+    public Robot robot() {
+        Robot robot = new Robot();
+        robot.setRobotType(env.getProperty("robotType"));
+        robot.setVersion(Integer.parseInt(env.getProperty("version")));
+        robot.setSensor(sensor);
+        return robot;
+    }
+}
+```
+
+---
+
+## QAConfig.java
+
+```java
+@Configuration
+@PropertySource("classpath:application_jc_profiles_qa.properties")
+@ComponentScan(basePackages = {"com.spring.annotations.javaconfig.profiles"})
+@Profile("qa") // Here you tell to IOC container this configuration belongs to which env
+public class QAConfig {
+
+    @Autowired
+    private Environment env;
+
+    @Autowired
+    @Qualifier("termnalSensorImpl")
+    private ISensor sensor;
+
+    @Bean
+    public Robot robot() {
+        Robot robot = new Robot();
+        robot.setRobotType(env.getProperty("robotType"));
+        robot.setVersion(Integer.parseInt(env.getProperty("version")));
+        robot.setSensor(sensor);
+        return robot;
+    }
+}
+```
+
+---
+
+## application_jc_profiles_dev.properties
+
+```
+robotType=Smart Andriod
+version=2
+range=100
+heatDetection=200
+```
+
+---
+
+## application_jc_profiles_qa.properties
+
+```
+robotType=Smart IOS
+version=3
+range=200
+heatDetection=500
+```
+
+---
+
+## ProfileJavaConfigTest.java
+
+```java
+public class ProfileJavaConfigTest {
+
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext();
+        ((AnnotationConfigApplicationContext)context).getEnvironment().setActiveProfiles("dev");
+        ((AnnotationConfigApplicationContext)context).register(DevConfig.class, QAConfig.class);
+        ((AnnotationConfigApplicationContext)context).refresh();
+
+        Robot robot = context.getBean("robot", Robot.class);
+        System.out.println(robot);
+    }
+}
+```
+
+---
+
+## Output
+
+### dev profile:
+
+```
+InfraSensor initialized
+TermnalSensor initalized
+Robot{robotType='Smart Andriod', version=2, sensor=com.spring.annotations.javaconfig.profiles.InfraSensorImpl@51f116b8}
+```
+
+### qa profile:
+
+```
+TermnalSensor initalized
+InfraSensor initialized
+Robot{robotType='Smart IOS', version=3, sensor=com.spring.annotations.javaconfig.profiles.TermnalSensorImpl@51f116b8}
+```
+
+
 
