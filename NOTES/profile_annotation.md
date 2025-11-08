@@ -466,5 +466,137 @@ InfraSensor initialized
 Robot{robotType='Smart IOS', version=3, sensor=com.spring.annotations.javaconfig.profiles.TermnalSensorImpl@51f116b8}
 ```
 
+# Java Config Annotation Support
+
+---
+
+## Pictorial Respresentation
+
+<img width="3185" height="1287" alt="JAVA_CONFIG_ANNON_SUPPORT" src="https://github.com/user-attachments/assets/f4c7f433-9ddb-4bd0-a1dc-372639d9daf7" />
 
 
+## Example Program
+
+### Robot.java
+```java
+//Source Code Present
+@Named
+public class Robot {
+
+    @Value("${robotType}")
+    private String robotType;
+
+    //@Inject
+    //@Named("sensor2")
+    /*
+    Resources and @Inject both are same
+    */
+    @Resource(name = "sensor1")
+    private Sensor sensor;
+
+    public void setRobotType(String robotType) {
+        this.robotType = robotType;
+    }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "robotType='" + robotType + '\'' +
+                ", sensor=" + sensor +
+                '}';
+    }
+}
+````
+
+---
+
+### Sensor.java
+
+```java
+//No Source Code
+public class Sensor {
+
+    private String sensorType;
+    private String frequency;
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
+    }
+
+    public void setSensorType(String sensorType) {
+        this.sensorType = sensorType;
+    }
+
+    @Override
+    public String toString() {
+        return "Sensor{" +
+                "sensorType='" + sensorType + '\'' +
+                ", frequency='" + frequency + '\'' +
+                '}';
+    }
+}
+```
+
+---
+
+### JCASConfig.java
+
+```java
+@Configuration
+@PropertySource("classpath:application_jcas.properties")
+@ComponentScan(basePackages = {"com.spring.annotations.jcas"})
+public class JCASConfig {
+
+    @Autowired
+    private Environment env;
+
+    @Bean
+    public Sensor sensor1() {
+        Sensor sensor = new Sensor();
+        sensor.setSensorType(env.getProperty("sensorType"));
+        return sensor;
+    }
+
+    @Bean
+    public Sensor sensor2() {
+        Sensor sensor = new Sensor();
+        sensor.setSensorType(env.getProperty("sensorType"));
+        sensor.setFrequency(env.getProperty("frequency"));
+        return sensor;
+    }
+}
+```
+
+---
+
+### application_jcas.properties
+
+```
+robotType=Smart Robo
+sensorType=Digital Sensor
+frequency=100
+```
+
+---
+
+### JCASTest.java
+
+```java
+public class JCASTest {
+
+    public static void main(String[] args) {
+
+        ApplicationContext context = new AnnotationConfigApplicationContext("com.spring.annotations.jcas");
+        Robot robot = context.getBean("robot", Robot.class);
+        System.out.println(robot);
+    }
+}
+```
+
+---
+
+## Output
+
+```
+Robot{robotType='Smart Robo', sensor=Sensor{sensorType='Digital Sensor', frequency='null'}}
+```
